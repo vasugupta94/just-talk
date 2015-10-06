@@ -32,11 +32,16 @@
             </div><!-- /.navbar-collapse -->
           </div><!-- /.container-fluid -->
         </nav> 
-     
-        <div class="col-lg-6" id="received_messages"></div>
-        <input type="text" id="message_text" placeholder="Enter your message here.">
-        <input type="button" id="send_button" value="Send">
-        
+    
+	<div class="container-fluid">	
+		<div class="row"> 
+			<div class="col-lg-6 col-sm-10 col-md-8 col-xs-10" id="received_messages"></div>
+		</div>
+		<div class="row"> 
+			<input type="text" id="message_text" placeholder="Enter your message here.">
+			<input type="button" id="send_button" value="Send">
+		</div>
+	</div> 
 		<!-- Js in bottom so the DOM will load Faster-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>

@@ -56,10 +56,13 @@ function onMessageArrived(message) {
     var new_content = document.createElement("div");
 
     new_content.innerHTML = "<br>" + message.payloadString;
+    new_content.className = "row"
 
     if (img_exists) {
         var new_img = document.createElement("img");
         new_img.setAttribute("src", img);
+	new_img.style.height="auto"
+	new_img.style.width="100%"
         new_content.innerHTML += "<br>"
     }
 
