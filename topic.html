@@ -1,0 +1,194 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Topic</title>
+    </head>
+    <link href="css/bootstrap.min.css" rel="stylesheet"> 
+	<!-- style>
+         /* h1 { 
+             color: #111; 
+             font-family: 'Helvetica Neue', sans-serif; 
+             font-size: 150px; font-weight: bold; letter-spacing: -1px; line-height: 1; text-align: center;
+             border: solid 1px #CCCCCC;
+             background-color: #f9f9f9;
+             position:absolute; 
+             bottom:0px;"
+         }
+         
+        .nav ul {
+        list-style: none;
+        text-align: right;
+        padding: 0;
+        margin: 0;
+        }
+    
+        .nav li {
+          font-family: 'Oswald', sans-serif;
+          font-size: 1.0em;
+          line-height: 40px;
+          height: 40px;
+          border-bottom: 1px solid #888;
+        }
+         
+        .nav a {
+          text-decoration: none;
+          color: #fff;
+          display: block;
+          transition: .3s background-color;
+        }
+         
+        .nav a:hover {
+          background-color: #005f5f;
+        }
+         
+        .nav a.active {
+          background-color: #fff;	
+          color: #444;
+          text-align: center;
+        }
+         
+        @media screen and (min-width: 1000px) {
+          .nav li {
+            width: 180px;
+            border-bottom: none;
+            height: 30px;
+            line-height: 50px;
+            font-size: 1.4em;
+            display: inline-block;
+          }
+         
+         .nav li {
+            display: inline-block;
+            margin-right: 10px;
+          } */
+	</style>-->
+	</head>
+    <body>
+        
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">Just TALK</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+              <ul class="nav navbar-nav">
+              </ul>
+              <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Trending Topics</a></li>
+                <li><a href="#">Search for a Topic</a></li>
+                <li class="active"><a href="topic.html">New Topic</a></li>
+              </ul>
+            </div><!-- /.navbar-collapse -->
+          </div><!-- /.container-fluid -->
+        </nav> 
+        <!--<div class="nav">
+          <ul>
+                <li class="home"><a class="active" href="index.html">Home</a></li>
+                <li class="Trending"><a href="#">Trending Topics</a></li>
+                <li class="Search"><a href="#">Search for a Topic</a></li>
+                <li class="New"><a href="topic.html">New Topic</a></li>
+            </ul>
+        </div>-->
+     
+        <div class="col-lg-6" id="received_messages"></div>
+        <input type="text" id="message_text" placeholder="Enter your message here.">
+        <input type="button" id="send_button" value="Send">
+        
+		<!-- Js in bottom so the DOM will load Faster-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="js/mqttws31.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var user = prompt("What's your name?"); 
+			var topic = prompt("What would you like to talk about?");
+            // Create a client instance
+            // 127.0.0.1 is your localhost, but you would set this to the public DNS or IP
+            // Remember your broker (Mosquitto) has to be configured for websockets!
+            // the last argument is the client id which should (with almost certain probability) be unique for each client that connects
+            var client = new Paho.MQTT.Client('54.148.135.146', Number('1883'), (Math.random().toString(36)+'00000000000000000').slice(2, 7));
+
+            // set callback handlers
+            client.onConnectionLost = onConnectionLost;
+            client.onMessageArrived = onMessageArrived;
+
+            // connect the client
+            client.connect({onSuccess:onConnect});
+
+            // called when the client connects
+            function onConnect() {
+              // Once a connection has been made, make a subscription and send a message.
+              console.log("onConnect");
+              client.subscribe(topic);
+            }
+
+            // called when the client loses its connection
+            function onConnectionLost(responseObject) {
+              client.connect({onSuccess:onConnect}); 
+              if (responseObject.errorCode !== 0) {
+                console.log("onConnectionLost:"+responseObject.errorMessage);
+              }
+            }
+
+            String.prototype.endsWith = function(suffix) {
+                return this.indexOf(suffix, this.length - suffix.length) !== -1;
+            }
+
+            // called when a message arrives
+            // here you can render an image 
+            function onMessageArrived(message) {
+                var recv_msgs = document.getElementById("received_messages");
+                var payload = String(message.payloadString);
+                
+                // tokenize the payload 
+                var tokens = payload.split(" ");
+                var tokensLength = tokens.length;
+                
+                // iterate through and check to see if an image exists
+                var img_exists = false;
+                for (var i = 1; i < tokensLength; i++) {
+                    console.log(tokens[i]);
+                    if (String(tokens[i]).endsWith(".jpeg") || String(tokens[i]).endsWith(".jpg")) {
+                        img_exists = true;
+                        img = tokens[i];
+                        break;
+                    }
+                }                
+  
+                var new_content = document.createElement("div");
+
+                new_content.innerHTML = "<br>" + message.payloadString;
+
+                if (img_exists) {
+                    var new_img = document.createElement("img");
+                    new_img.setAttribute("src", img);
+                    new_content.innerHTML += "<br>"
+                }
+   
+                while (new_content.firstChild) {
+                    recv_msgs.appendChild(new_content.firstChild); 
+                }
+                if (img_exists) {
+                    recv_msgs.appendChild(new_img);
+                }
+            }
+
+            var button = document.getElementById("send_button");
+            var msg_text = document.getElementById("message_text"); 
+            button.onclick = function() {
+              message = new Paho.MQTT.Message(user + ": " + msg_text.value);
+              message.destinationName = topic;  // publish to a specific topic
+              client.send(message);
+            }
+        </script>
+
+   </body>
+<html>
